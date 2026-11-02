@@ -1,0 +1,20 @@
+{
+  "headers": {
+    "Archive/IArchive.h": "SevenZip.Interop.Archives",
+    "ICoder.h": "SevenZip.Interop.Compression",
+    "IPassword.h": "SevenZip.Interop.Cryptography",
+    "IProgress.h": "SevenZip.Interop.Progress",
+    "IStream.h": "SevenZip.Interop.Streams",
+    "UI/FileManager/IFolder.h": "SevenZip.Interop.FileManager"
+  },
+  "types": {
+    "ICompressProgressInfo": "SevenZip.Interop.Progress",
+    "ICryptoProperties": "SevenZip.Interop.Cryptography",
+    "ICryptoResetInitVector": "SevenZip.Interop.Cryptography",
+    "ICryptoSetPassword": "SevenZip.Interop.Cryptography",
+    "ICryptoSetCRC": "SevenZip.Interop.Cryptography",
+    "IHasher": "SevenZip.Interop.Hashing",
+    "IHashers": "SevenZip.Interop.Hashing",
+    "Func_GetHashers": "SevenZip.Interop.Hashing"
+  }
+}

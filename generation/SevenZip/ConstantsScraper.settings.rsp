@@ -1,0 +1,15 @@
+# These identifiers are reused by unrelated unscoped enums in IArchive.h.
+--exclude
+kKeepName
+--exclude
+kAltStreams
+--exclude
+kNtSecure
+--exclude
+kMultiSignature
+--exclude
+kUpdate
+--exclude
+kSkip
+--exclude
+kOK

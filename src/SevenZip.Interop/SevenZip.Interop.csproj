@@ -1,0 +1,59 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <AssemblyName>SevenZip.Interop</AssemblyName>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);NU5100</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageId>SevenZip.Interop</PackageId>
+    <PackageVersion>0.1.0</PackageVersion>
+    <Authors>0x5bfa</Authors>
+    <Description>7-Zip WinMD metadata, native runtime assets, and a CreateObject loader.</Description>
+    <PackageTags>7zip;7z;winmd;interop</PackageTags>
+    <PackageProjectUrl>https://github.com/0x5bfa/7z-metadata</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/0x5bfa/7z-metadata.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseFile>LICENSES/PackageLicenses.txt</PackageLicenseFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="$(SevenZipWinmdPath)"
+          Pack="true"
+          PackagePath="metadata/SevenZip.winmd"
+          Visible="false"
+          Condition="'$(SevenZipWinmdPath)' != ''" />
+    <None Include="$(SevenZipNativeAssetRoot)\win-x86\7z.dll"
+          Pack="true"
+          PackagePath="runtimes/win-x86/native/7z.dll"
+          Visible="false" />
+    <None Include="$(SevenZipNativeAssetRoot)\win-x64\7z.dll"
+          Pack="true"
+          PackagePath="runtimes/win-x64/native/7z.dll"
+          Visible="false" />
+    <None Include="$(SevenZipNativeAssetRoot)\win-arm64\7z.dll"
+          Pack="true"
+          PackagePath="runtimes/win-arm64/native/7z.dll"
+          Visible="false" />
+    <None Include="$(SevenZipPackageLicensePath)"
+          Pack="true"
+          PackagePath="LICENSES/PackageLicenses.txt"
+          Visible="false"
+          Condition="'$(SevenZipPackageLicensePath)' != ''" />
+    <None Include="..\..\packaging\README.md"
+          Pack="true"
+          PackagePath="README.md"
+          Visible="false" />
+    <None Include="..\..\packaging\buildTransitive\SevenZip.Interop.props"
+          Pack="true"
+          PackagePath="buildTransitive/SevenZip.Interop.props"
+          Visible="false" />
+  </ItemGroup>
+
+</Project>

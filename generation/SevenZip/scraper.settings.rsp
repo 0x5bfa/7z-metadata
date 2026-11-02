@@ -1,0 +1,23 @@
+# Give the repeated upstream EEnum declarations distinct WinMD names.
+--remap
+NCoderPropID::EEnum=CoderPropertyId
+--remap
+NMethodPropID::EEnum=MethodPropertyId
+--remap
+NModulePropID::EEnum=ModulePropertyId
+
+# These names are reused by constants and unscoped enums in IArchive.h.
+--exclude
+kKeepName
+--exclude
+kAltStreams
+--exclude
+kNtSecure
+--exclude
+kMultiSignature
+--exclude
+kUpdate
+--exclude
+kSkip
+--exclude
+kOK

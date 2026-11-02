@@ -1,0 +1,67 @@
+name: Update 7-Zip metadata
+
+on:
+  schedule:
+    - cron: '17 3 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update:
+    runs-on: windows-latest
+    steps:
+      - name: Check out repository and pinned submodule
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Update to latest 7-Zip release and build package
+        id: update
+        shell: pwsh
+        run: |
+          $release = Invoke-RestMethod 'https://api.github.com/repos/ip7z/7zip/releases/latest'
+          $tag = [string] $release.tag_name
+          if ([string]::IsNullOrWhiteSpace($tag)) {
+            throw 'The latest 7-Zip release did not include a tag name.'
+          }
+
+          git -C external/7zip fetch --depth 1 origin "refs/tags/$tag:refs/tags/$tag"
+          if ($LASTEXITCODE -ne 0) { throw "Could not fetch 7-Zip tag '$tag'." }
+          git -C external/7zip checkout --detach "refs/tags/$tag"
+          if ($LASTEXITCODE -ne 0) { throw "Could not check out 7-Zip tag '$tag'." }
+
+          ./scripts/Build-SevenZipPackage.ps1 -SevenZipTag $tag
+          if ($LASTEXITCODE -ne 0) { throw 'SevenZip.Interop package build failed.' }
+
+          git add external/7zip metadata/SevenZip.winmd
+          "tag=$tag" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+
+      - name: Create or update pull request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: automation/update-7zip
+          delete-branch: true
+          commit-message: Update 7-Zip metadata to ${{ steps.update.outputs.tag }}
+          title: Update 7-Zip metadata to ${{ steps.update.outputs.tag }}
+          body: |
+            Update the pinned 7-Zip source and regenerate the WinMD from its public interface headers.
+
+            - Upstream release: `${{ steps.update.outputs.tag }}`
+          - Generated metadata: `metadata/SevenZip.winmd`
+          - Built package: `SevenZip.Interop` with Windows x86, x64, and ARM64 native assets
+
+      - name: Upload NuGet package
+        uses: actions/upload-artifact@v4
+        with:
+          name: SevenZip.Interop-${{ steps.update.outputs.tag }}
+          path: artifacts/nupkg/*.nupkg
+          if-no-files-found: error
+          retention-days: 30

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+
+  <Import Project="Sdk.props" Sdk="Microsoft.Windows.WinmdGenerator" />
+
+  <ItemGroup>
+    <ResponseFile Remove="*.rsp" />
+    <!-- The SDK includes these optional files even when absent, forcing a rebuild on every invocation. -->
+    <AutoType Remove="$(MSBuildThisFileDirectory)autoTypes.json" Condition="!Exists('$(MSBuildThisFileDirectory)autoTypes.json')" />
+    <FunctionPointerFixup Remove="$(MSBuildThisFileDirectory)functionPointerFixups.json" Condition="!Exists('$(MSBuildThisFileDirectory)functionPointerFixups.json')" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ScraperRsp Include="scraper.settings.rsp" />
+    <ConstantsScraperRsp Include="ConstantsScraper.settings.rsp" />
+    <EmitterRsp Include="emitter.settings.rsp" />
+    <EmitterRsp Include="$(ObjDir)\namespace-map.rsp" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <OutputWinmd Condition="'$(OutputWinmd)' == ''">$(MSBuildThisFileDirectory)..\..\metadata\SevenZip.winmd</OutputWinmd>
+    <WinmdVersion>1.0.0.0</WinmdVersion>
+    <GenerateAssemblyVersionInfo>false</GenerateAssemblyVersionInfo>
+    <SdkIncRoot>$(MSBuildThisFileDirectory)..\..\external\7zip\CPP</SdkIncRoot>
+    <AdditionalIncludes>$(SdkIncRoot);$(SdkIncRoot)\7zip</AdditionalIncludes>
+    <ScraperHeader>$(ObjDir)\scraper.header.txt</ScraperHeader>
+    <ConstantsScraperHeader Condition="!Exists('$(ConstantsScraperHeader)')" />
+    <UseWinSDKAssets>true</UseWinSDKAssets>
+    <ShowEmitWinmdOutputDetails>true</ShowEmitWinmdOutputDetails>
+  </PropertyGroup>
+
+  <UsingTask TaskName="GenerateSevenZipInputs"
+             TaskFactory="RoslynCodeTaskFactory"
+             AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+    <Task>
+      <Code Type="Class" Language="cs" Source="$(MSBuildThisFileDirectory)build\GenerateSevenZipInputs.cs" />
+    </Task>
+  </UsingTask>
+
+  <!-- Prepare items during target execution so a first build does not depend on an existing obj directory. -->
+  <Target Name="PrepareSevenZipInputs" BeforeTargets="PrepScraperHeader">
+    <GenerateSevenZipInputs CppRoot="$(SdkIncRoot)"
+                            NamespaceMapPath="$(MSBuildThisFileDirectory)namespace-map.json"
+                            PartitionsRoot="$(ObjDir)\generated-partitions"
+                            ScraperHeaderPath="$(ScraperHeader)"
+                            NamespaceResponsePath="$(ObjDir)\namespace-map.rsp">
+      <Output TaskParameter="Partitions" ItemName="Partition" />
+    </GenerateSevenZipInputs>
+    <MakeDir Directories="$([System.IO.Path]::GetDirectoryName('$(OutputWinmd)'))" />
+  </Target>
+
+  <Import Project="Sdk.targets" Sdk="Microsoft.Windows.WinmdGenerator" />
+
+  <!-- The SDK deletes all of obj, including project.assets.json restored before Rebuild. -->
+  <ItemGroup>
+    <Clean Remove="obj\**" />
+  </ItemGroup>
+
+  <Target Name="BeforeClean">
+    <RemoveDir Directories="$(GeneratedDir);$(ScratchOutputDir);$(CompiledHeadersDir);$(ObjDir)\generated-partitions" />
+    <Delete Files="$(ScraperHeader);$(ObjDir)\namespace-map.rsp;$(OutputWinmd)" />
+  </Target>
+
+</Project>
